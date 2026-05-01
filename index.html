@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Yeboah's Law of Cutting Efficiency - Refined Simulation</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        .slider { -webkit-appearance: none; width: 100%; height: 8px; border-radius: 5px; background: #d1d5db; outline: none; }
+        .slider::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 20px; height: 20px; border-radius: 50%; background: #2563eb; cursor: pointer; }
+        .gauge-container { transition: all 0.3s ease; }
+    </style>
+</head>
+<body class="p-6">
+
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+        <div class="bg-blue-900 text-white p-6">
+            <h1 class="text-3xl font-bold">Yeboah's Law Simulator</h1>
+            <p class="text-blue-200 mt-2 text-lg">Interactive validation of the refined cutting efficiency ratio (&eta;)</p>
+        </div>
+
+        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
+            
+            <!-- Controls Section -->
+            <div class="space-y-6">
+                <h2 class="text-xl font-semibold border-b pb-2">1. Adjust Variables</h2>
+                
+                <!-- Kinetic Variables -->
+                <div class="bg-blue-50 p-4 rounded-lg space-y-4">
+                    <h3 class="font-bold text-blue-800">Kinetic Input & Energy Recovery</h3>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Tool Mass (m)</span> <span id="m-val">2.0 kg</span></label>
+                        <input type="range" id="mass" min="0.5" max="5.0" step="0.1" value="2.0" class="slider mt-2">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Impact Velocity (v)</span> <span id="v-val">10.0 m/s</span></label>
+                        <input type="range" id="velocity" min="1.0" max="25.0" step="0.5" value="10.0" class="slider mt-2">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Yeboah Constant (k<sub>Y</sub>)</span> <span id="ky-val">0.82</span></label>
+                        <input type="range" id="ky-coeff" min="0.1" max="1.0" step="0.01" value="0.82" class="slider mt-2">
+                    </div>
+                </div>
+
+                <!-- Material Variables -->
+                <div class="bg-red-50 p-4 rounded-lg space-y-4">
+                    <h3 class="font-bold text-red-800">Material & Geometric Resistance</h3>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Shear Resistance (&tau;)</span> <span id="t-val">15.0 MPa</span></label>
+                        <input type="range" id="tau" min="5.0" max="50.0" step="1.0" value="15.0" class="slider mt-2">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Contact Area (A)</span> <span id="a-val">2.0 mm&sup2;</span></label>
+                        <input type="range" id="area" min="0.5" max="5.0" step="0.1" value="2.0" class="slider mt-2">
+                    </div>
+                    <div>
+                        <label class="flex justify-between text-sm font-medium text-gray-700"><span>Material Thickness (d)</span> <span id="d-val">30.0 mm</span></label>
+                        <input type="range" id="depth" min="10.0" max="100.0" step="1.0" value="30.0" class="slider mt-2">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Results Section -->
+            <div class="flex flex-col items-center justify-center space-y-8 bg-gray-50 p-6 rounded-lg border-2 border-dashed border-gray-300">
+                <h2 class="text-xl font-semibold text-gray-800">Efficiency Ratio (&eta;)</h2>
+                
+                <!-- The Refined Equation -->
+                <div class="text-2xl font-serif bg-white p-4 rounded shadow-sm text-center w-full flex items-center justify-center space-x-2">
+                    <span>&eta; = k<sub>Y</sub></span>
+                    <span class="text-4xl font-light">(</span>
+                    <div class="flex flex-col items-center justify-center">
+                        <span class="text-blue-600 border-b-2 border-black px-2">mv&sup2;</span>
+                        <span class="text-red-600 px-2">2d&tau;A</span>
+                    </div>
+                    <span class="text-4xl font-light">)</span>
+                </div>
+
+                <!-- The Output -->
+                <div id="result-circle" class="gauge-container w-48 h-48 rounded-full flex flex-col items-center justify-center text-white shadow-xl border-4 border-white">
+                    <span class="text-5xl font-bold" id="eta-display">0.00</span>
+                    <span class="text-sm mt-2 uppercase tracking-wider font-semibold" id="status-display">Calculating</span>
+                </div>
+
+                <!-- Breakdown -->
+                <div class="w-full text-sm text-gray-600 space-y-2">
+                    <div class="flex justify-between border-b pb-1">
+                        <span>Kinetic Factor (mv&sup2;):</span>
+                        <span id="ke-display" class="font-mono font-bold text-blue-600">0</span>
+                    </div>
+                    <div class="flex justify-between border-b pb-1">
+                        <span>Resistance Factor (2d&tau;A):</span>
+                        <span id="res-display" class="font-mono font-bold text-red-600">0</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Get DOM Elements
+        const inputs = ['mass', 'velocity', 'ky-coeff', 'tau', 'area', 'depth'];
+        const displays = {
+            mass: document.getElementById('m-val'),
+            velocity: document.getElementById('v-val'),
+            'ky-coeff': document.getElementById('ky-val'),
+            tau: document.getElementById('t-val'),
+            area: document.getElementById('a-val'),
+            depth: document.getElementById('d-val')
+        };
+
+        const etaDisplay = document.getElementById('eta-display');
+        const statusDisplay = document.getElementById('status-display');
+        const resultCircle = document.getElementById('result-circle');
+        const keDisplay = document.getElementById('ke-display');
+        const resDisplay = document.getElementById('res-display');
+
+        function calculate() {
+            // Get values
+            const m = parseFloat(document.getElementById('mass').value);
+            const v = parseFloat(document.getElementById('velocity').value);
+            const ky = parseFloat(document.getElementById('ky-coeff').value);
+            const tau = parseFloat(document.getElementById('tau').value);
+            const a = parseFloat(document.getElementById('area').value);
+            const d = parseFloat(document.getElementById('depth').value);
+
+            // Update labels
+            displays.mass.innerText = m.toFixed(1) + ' kg';
+            displays.velocity.innerText = v.toFixed(1) + ' m/s';
+            displays['ky-coeff'].innerText = ky.toFixed(2);
+            displays.tau.innerText = tau.toFixed(1) + ' MPa';
+            displays.area.innerHTML = a.toFixed(1) + ' mm&sup2;';
+            displays.depth.innerText = d.toFixed(1) + ' mm';
+
+            // Calculate Refined Yeboah's Law
+            // Scaling factor keeps the arbitrary slider units balanced around 1.0 for demonstration
+            const scalingFactor = 0.1; 
+            
+            const kineticFactor = m * Math.pow(v, 2);
+            const resistanceFactor = 2 * d * tau * a * scalingFactor;
+            
+            const eta = ky * (kineticFactor / resistanceFactor);
+
+            // Update UI
+            keDisplay.innerText = kineticFactor.toFixed(1);
+            resDisplay.innerText = resistanceFactor.toFixed(1);
+            etaDisplay.innerText = eta.toFixed(2);
+
+            if (eta >= 1) {
+                resultCircle.style.backgroundColor = '#10b981'; // Emerald green
+                statusDisplay.innerText = 'Severance!';
+            } else {
+                resultCircle.style.backgroundColor = '#ef4444'; // Red
+                statusDisplay.innerText = 'Arrested';
+            }
+        }
+
+        // Add event listeners
+        inputs.forEach(id => {
+            document.getElementById(id).addEventListener('input', calculate);
+        });
+
+        // Initial calculation
+        calculate();
+    </script>
+</body>
+</html>
