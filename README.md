@@ -6,7 +6,7 @@ Interactive simulation of Yeboah's Law of Cutting Efficiency
 Welcome to the interactive simulation for **Yeboah's Law of Cutting Efficiency**. This repository hosts a web-based thermodynamic and kinetic calculator designed to model the mechanics of material severance during dynamic impact.
 
 You can access the live interactive simulation here: 
-👉 **[Insert your GitHub Pages link here, e.g., https://yourusername.github.io/yeboahs-law-simulation/]**
+👉 **[https://cliffordyeboah886-wq.github.io/yeboahs-law-simulation/]**
 
 ---
 
