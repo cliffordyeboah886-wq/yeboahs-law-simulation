@@ -35,7 +35,8 @@
                     </div>
                     <div>
                         <label class="flex justify-between text-sm font-medium text-gray-700"><span>Impact Velocity (v)</span> <span id="v-val">10.0 m/s</span></label>
-                        <input type="range" id="velocity" min="1.0" max="25.0" step="0.5" value="10.0" class="slider mt-2">
+                        <!-- Updated min to 0.0 and step to 0.1 for precise velocity control -->
+                        <input type="range" id="velocity" min="0.0" max="25.0" step="0.1" value="10.0" class="slider mt-2">
                     </div>
                     <div>
                         <label class="flex justify-between text-sm font-medium text-gray-700"><span>Yeboah Constant (k<sub>Y</sub>)</span> <span id="ky-val">0.82</span></label>
