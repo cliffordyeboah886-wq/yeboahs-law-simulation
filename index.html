@@ -12,9 +12,9 @@
         .gauge-container { transition: all 0.3s ease; }
     </style>
 </head>
-<body class="p-6">
+<body class="min-h-screen flex flex-col p-6">
 
-    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
+    <div class="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden flex-grow w-full">
         <div class="bg-blue-900 text-white p-6">
             <h1 class="text-3xl font-bold">Yeboah's Law Simulator</h1>
             <p class="text-blue-200 mt-2 text-lg">Interactive validation of the refined cutting efficiency ratio (&eta;)</p>
@@ -48,15 +48,15 @@
                     <h3 class="font-bold text-red-800">Material & Geometric Resistance</h3>
                     <div>
                         <label class="flex justify-between text-sm font-medium text-gray-700"><span>Shear Resistance (&tau;)</span> <span id="t-val">15.0 MPa</span></label>
-                        <input type="range" id="tau" min="5.0" max="50.0" step="1.0" value="15.0" class="slider mt-2">
+                        <input type="range" id="tau" min="0.0" max="50.0" step="0.5" value="15.0" class="slider mt-2">
                     </div>
                     <div>
                         <label class="flex justify-between text-sm font-medium text-gray-700"><span>Contact Area (A)</span> <span id="a-val">2.0 mm&sup2;</span></label>
-                        <input type="range" id="area" min="0.5" max="5.0" step="0.1" value="2.0" class="slider mt-2">
+                        <input type="range" id="area" min="0.0" max="5.0" step="0.1" value="2.0" class="slider mt-2">
                     </div>
                     <div>
                         <label class="flex justify-between text-sm font-medium text-gray-700"><span>Material Thickness (d)</span> <span id="d-val">30.0 mm</span></label>
-                        <input type="range" id="depth" min="10.0" max="100.0" step="1.0" value="30.0" class="slider mt-2">
+                        <input type="range" id="depth" min="0.0" max="100.0" step="1.0" value="30.0" class="slider mt-2">
                     </div>
                 </div>
             </div>
@@ -96,6 +96,13 @@
             </div>
         </div>
     </div>
+
+    <!-- Footer with Copyright -->
+    <footer class="text-gray-500 py-6 text-center mt-auto">
+        <div class="max-w-4xl mx-auto px-4">
+            <p class="font-semibold">&copy; 2026 Clifford Yeboah. All rights reserved.</p>
+        </div>
+    </footer>
 
     <script>
         // Get DOM Elements
@@ -139,14 +146,27 @@
             const kineticFactor = m * Math.pow(v, 2);
             const resistanceFactor = 2 * d * tau * a * scalingFactor;
             
-            const eta = ky * (kineticFactor / resistanceFactor);
+            let eta;
+            
+            // Handle zero resistance (division by zero)
+            if (resistanceFactor === 0) {
+                eta = Infinity;
+            } else {
+                eta = ky * (kineticFactor / resistanceFactor);
+            }
 
-            // Update UI
+            // Update UI Breakdown
             keDisplay.innerText = kineticFactor.toFixed(1);
             resDisplay.innerText = resistanceFactor.toFixed(1);
-            etaDisplay.innerText = eta.toFixed(2);
+            
+            // Update UI Gauge
+            if (!isFinite(eta)) {
+                etaDisplay.innerHTML = '&infin;'; // Infinity symbol
+            } else {
+                etaDisplay.innerText = eta.toFixed(2);
+            }
 
-            if (eta >= 1) {
+            if (eta >= 1 || !isFinite(eta)) {
                 resultCircle.style.backgroundColor = '#10b981'; // Emerald green
                 statusDisplay.innerText = 'Severance!';
             } else {
@@ -165,11 +185,3 @@
     </script>
 </body>
 </html>
-
- <!-- Footer with Copyright -->
-    <footer class="bg-gray-800 text-gray-400 py-6 text-center mt-auto">
-        <div class="max-w-4xl mx-auto px-4">
-            <p class="mb-2">Based on Yeboah's Law of Cutting Efficiency: &eta; = k_Y * (mv&sup2; / 2d&tau;A)</p>
-            <p class="font-semibold text-gray-300">&copy; 2026 Clifford Yeboah. All rights reserved.</p>
-        </div>
-    </footer>
