@@ -1,3 +1,10 @@
+# ⚠️ DEPRECATED / ARCHIVED
+This repository is part of the early development phase of Yeboah's Law. 
+It is no longer maintained. 
+
+**Please visit the latest version here:** 
+👉 [Yeboah’s Law Digital Twin v2.0](https://cliffordyeboah886-wq.github.io/yeboahs-law-digital-twin/)
+---
 # yeboahs-law-simulation
 Interactive simulation of Yeboah's Law of Cutting Efficiency
 
